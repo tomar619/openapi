@@ -1,0 +1,710 @@
+openapi: 3.0.3
+info:
+  title: Airside API Documentation
+  description: |-
+    `Airside` is the flight crew app for iOS, iPad & Android that makes crew life easier.  Get the app at _[https://airside.app/download](https://airside.app/download)_. 
+    
+    Check out more details about app features at _[https://airside.app/](https://airside.app/)_.
+    
+    _**Airside** simplifies crew work so they can make travel easier for Scandinavian travelers._
+
+  termsOfService: https://airside.app/termsofuse
+  contact:
+    name: "Airside Team"
+    email: "airside@sas.se"
+  # license:
+  #   name: Apache 2.0
+  #   url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.1
+externalDocs:
+  description: Airside tutorials
+  url: https://airside.app/tutorials/
+servers:
+  - url:   https://dev-api.airside.app/v2/
+    description: Development server
+  - url:   https://api.airside.app/v2/
+    description: Production server
+tags:
+  - name: Station Info
+    description: Operations about station info feature
+  - name: Station Notes
+    description: Operations about station notes feature
+security:
+  - BearerAuth: []
+paths:
+  /station/{airport}:
+    get:
+      tags:
+        - Station Info
+      summary: Get station info
+      description: This can only be done by the logged in crew.
+      operationId: getStationInfo
+      parameters:
+        - $ref: '#/components/parameters/stationPathParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/StationInfoGetResponse'
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+  /station/{airport}/hotel/city:
+    get:
+      tags:
+        - Station Info
+      summary: Get station city hotel image
+      description: This can only be done by the logged in crew.
+      operationId: getStationCityHotel
+      parameters:
+        - $ref: '#/components/parameters/stationPathParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/StationHotelGetResponse'
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+  /station/{airport}/notes:
+    post:
+      tags:
+        - Station Notes
+      summary: Create station note
+      description: This can only be done by the logged in crew.
+      operationId: createStationNote
+      parameters:
+        - $ref: '#/components/parameters/stationPathParam'
+      requestBody:
+        $ref: '#/components/requestBodies/StationNoteCreationRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/StationNotePostResponse'
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+    get:
+      tags:
+        - Station Notes
+      summary: Get all station notes
+      description: This can only be done by the logged in crew.
+      operationId: getStationNotes
+      parameters:
+        - $ref: '#/components/parameters/stationPathParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/StationNoteGetResponse'
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+    put:
+      tags:
+        - Station Notes
+      summary: Update station note
+      description: This can only be done by the logged in crew.
+      operationId: updateStationNote
+      parameters:
+        - $ref: '#/components/parameters/stationPathParam'
+      requestBody:
+        $ref: '#/components/requestBodies/StationNoteUpdateRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/StationNotePutResponse'
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      tags:
+        - Station Notes
+      summary: Upvote/downvote station note
+      description: This can only be done by the logged in crew.
+      operationId: updateStationNoteVote
+      parameters:
+        - $ref: '#/components/parameters/stationPathParam'
+      requestBody:
+        $ref: '#/components/requestBodies/StationNotePatchRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/StationNotePatchResponse'
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      tags:
+        - Station Notes
+      summary: Delete station note
+      description: This can only be done by the logged in crew for self created notes.
+      operationId: deleteStationNote
+      parameters:
+        - $ref: '#/components/parameters/stationPathParam'
+      requestBody:
+        $ref: '#/components/requestBodies/StationNoteDeleteRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/StationNoteDeleteResponse'
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+components:
+  parameters:
+    stationPathParam:
+      name: airport
+      in: path
+      schema:
+        type: string
+      required: true
+      example: ARN
+  examples:
+    StationInfoResponseExample:
+      summary: Fetched station info
+      value:
+        status: 200
+        body:
+          station_iata: "OSL"
+          can_checkin: 0
+          station_icao: "ENGM"
+          station_idcode: "ENGM"
+          lon: "11.10032346787900"
+          lat: "60.193901675387690"
+          destinationInfo:
+            groundHandling:
+              name: Ground Handler info
+              phone:
+                - desc: "Phone 1"
+                  value: "+4787654321"
+              email:
+                - desc: "Email:"
+                  value: "OSL@sas.no"
+              text:
+                - desc: "Name of Ground Handler"
+                  value: "SAS Ground Handling (SGH)"
+            fuelInfo:
+              text:
+                - desc: "Oilcompany:"
+                  value: "Air BP"
+            stnInfo:
+              text:
+                - desc: "ULD stock"
+                  value: "1"
+            contractedServiceInfo:
+              text:
+                - desc: "Night stop cleaning report"
+                  value: "https://forms.office.com/r/s78f5g7s9s"
+          hotelInfo:
+            cityHotel:
+              name: "Radisson Blu Hotel"
+              phone: "+47 11 22 33 44"
+              email: "info.blu@radisson.com"
+              address: "Main Road 3, Oslo"
+              website: "https://rbhotels.com"
+            airportHotel:
+              name: "Radisson Red Hotel"
+              phone: "+47 22 33 44 55"
+              email: "info.red@radisson.com"
+              address: "Henrik Road, Gardermoen, Norge"
+              website: "https://rbhotels.com"
+          pickup:
+            cityHotel:
+              qTime: "30 min"
+              pickupTime: "1h 25 mins before STD"
+            airportHotel:
+              qTime: "20 min"
+              pickupTime: "walking distance"
+            otherInfo: "Crew can use counter 5 for check-in"
+          transport:
+            name: "Gardermoen Crewtransport"
+            phone:
+              - "+4712345678"
+              - "+4798765432"
+    StationNotePostRequestExample:
+      summary: Station Note
+      value:
+        note: "Station note created"
+        visibility: 1
+    StationNotePostResponseExample:
+      summary: Station Note Created
+      value:
+        status: 200
+        body:
+          noteId: "92b1322b-3f4e-401f-af3d-6f08c64dddc6"
+          note: "Test note created from Swagger"
+          activeVersion: "83fd1949-05fa-472f-9d44-526eaa016f23"
+          visibility: 1,
+          createdBy: "Peter Pilot"
+          createdAt: "2023-01-09T14:12:08.297Z"
+    StationNoteGetResponseExample:
+      summary: Station Notes Fetched
+      value:
+        status: 200
+        body:
+          - noteId: "7d14f985-83be-4674-a534-35fa015b1a27"
+            visibility: 1
+            createdBy: "Peter Prendal"
+            userId: "26625"
+            activeVersion: "8fb52666-8879-4018-9913-4a3f98691748"
+            versions: 
+              - versionId: "8fb52666-8879-4018-9913-4a3f98691748"
+                note: "Test notes created from Swagger"
+                createdBy: "Peter Prendal"
+                userId: "26625"
+                createdAt: "2023-01-09T14:12:08.313Z"
+                upvotes: 0
+                downvotes: 0
+                upvoted: false
+                downvoted: false
+    StationNotePutRequestExample:
+      summary: Station Note
+      value:
+        note: "Note modified from Swagger"
+        noteId: "92b1322b-3f4e-401f-af3d-6f08c64dddc6"
+        activeVersion: "8fb52666-4444-6666-9913-4a3f98691748"
+    StationNotePutResponseExample:
+      summary: Station note updated
+      value:
+        status: 200
+        body:
+          noteId: "92b1322b-3f4e-401f-af3d-6f08c64dddc6"
+          note: "Note modified from Swagger"
+          activeVersion: "147d2542-47f0-44c4-a503-bb3985d35130"
+          versions:
+            - note: "Note modified from Swagger"
+              createdBy: "Peter Pilot"
+              createdAt: "2023-01-10T13:44:09.714Z"
+              upvotes: 0
+              downvotes: 0
+              upvoted: false
+              downvoted: false
+    StationNotePatchRequestExample:
+      summary: Station Note Vote
+      value:
+        noteId: "92b1322b-3f4e-401f-af3d-6f08c64dddc6"
+        upvote: 1
+        downvote: 0
+    StationNotePatchResponseExample:
+      summary: Station Note Voted
+      value:
+        status: 200
+        body:
+          noteId: "92b1322b-3f4e-401f-af3d-6f08c64dddc6"
+          note: "Note modified from Swagger"
+          visibility: 1
+          activeVersion: "147d2542-47f0-44c4-a503-bb3985d35130"
+          versions:
+            - note: "Note modified from Swagger"
+              createdBy: "Peter Pilot"
+              createdAt: "2023-01-10T13:44:09.714Z"
+              upvotes: 1
+              downvotes: 0
+              upvoted: true
+              downvoted: false
+    StationNoteDeleteRequestExample:
+      summary: Station Note delete
+      value:  
+        noteId: "92b1322b-3f4e-401f-af3d-6f08c64dddc6"
+    StationNoteDeleteResponseExample:
+      summary: Station Note Deleted
+      value:
+        status: 204
+  requestBodies:
+    StationNoteCreationRequest:
+      description: A JSON object containing station note
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              note:
+                type: string
+              visibility:
+                type: integer
+          examples:
+              StationNoteCreationRequestExample:
+                $ref: '#/components/examples/StationNotePostRequestExample'
+    StationNoteUpdateRequest:
+      description: A JSON object containing station note update
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              note:
+                type: string
+              noteId:
+                type: string
+              activeVersion:
+                type: string
+          examples:
+            StationNoteCreationRequestExample:
+              $ref: '#/components/examples/StationNotePutRequestExample'
+    StationNotePatchRequest:
+      description: A JSON object containing station note vote
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              noteId:
+                type: string
+              upvote:
+                type: boolean
+              downvote: 
+                type: boolean
+          examples:
+            StationNoteUpdateVoteRequestExample:
+              summary: Station Note Vote
+              value:
+                noteId: "92b1322b-3f4e-401f-af3d-6f08c64dddc6"
+                upvote: 1
+                downvote: 0     
+    StationNoteDeleteRequest:
+      description: A JSON object containing station noteId to delete
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              noteId:
+                type: string
+          examples:
+            StationNoteDeleteRequestExample:
+              summary: Station Note delete
+              value:  
+                noteId: "92b1322b-3f4e-401f-af3d-6f08c64dddc6"
+  schemas:
+    StationInfo:
+      type: object
+      properties:
+        station_iata:
+          type: string
+        can_checkin:
+          type: integer
+        station_icao:
+          type: string
+        station_idcode:
+          type: string
+        lon:
+          type: string
+        lat:
+          type: string
+        destinationInfo:
+          type: object
+          properties:
+            groundHandling:
+              type: object
+              properties:
+                name:
+                  type: string
+                phone:
+                  type: array
+                  items:
+                    properties:
+                        desc:
+                          type: string
+                        value:
+                          type: string
+                email:
+                  type: array
+                  items:
+                    properties:
+                        desc:
+                          type: string
+                        value:
+                          type: string
+                text:
+                  type: array
+                  items:
+                    properties:
+                        desc:
+                          type: string
+                        value:
+                          type: string
+            fuelInfo:
+              type: object
+              properties:
+                text:
+                  type: array
+                  items:
+                    properties:
+                        desc:
+                          type: string
+                        value:
+                          type: string
+            stnInfo:
+              type: object
+              properties:
+                text:
+                  type: array
+                  items:
+                    properties:
+                        desc:
+                          type: string
+                        value:
+                          type: string
+            contractedServiceInfo:
+              type: object
+              properties:
+                text:
+                  type: array
+                  items:
+                    properties:
+                        desc:
+                          type: string
+                        value:
+                          type: string
+        hotelInfo:
+          type: object
+          properties:
+            cityHotel:
+              type: object
+              properties:
+                name:
+                  type: string
+                phone:
+                  type: string
+                email:
+                  type: string
+                address:
+                  type: string
+                website:
+                  type: string
+            airportHotel:
+              type: object
+              properties:
+                name:
+                  type: string
+                phone:
+                  type: string
+                email:
+                  type: string
+                address:
+                  type: string
+                website:
+                  type: string
+        pickup:
+          type: object
+          properties:
+            cityHotel:
+              type: object
+              properties:
+                qTime:
+                  type: string
+                pickupTime:
+                  type: string
+            airportHotel:
+              type: object
+              properties:
+                qTime:
+                  type: string
+                pickupTime:
+                  type: string
+            otherInfo:
+              type: string
+        transport:
+          type: object
+          properties:
+            name:
+              type: string
+            phone:
+              type: array
+              items:
+                properties:
+                  number:
+                    type: string
+    StationNote:
+      type: object
+      properties:
+        noteId:
+          type: string
+        visibility:
+          type: integer
+        createdBy:
+          type: string
+        userId:
+          type: string
+        activeVersion:
+          type: string
+        versions: 
+          type: array
+          items:
+            $ref: '#/components/schemas/StationNoteVersion'
+    StationNoteVersion:
+      type: object
+      properties:
+        versionId:
+          type: string
+        note:
+          type: string
+        createdBy:
+          type: string
+        userId:
+          type: string
+        createdAt:
+          type: string
+        upvotes:
+          type: integer
+        downvotes:
+          type: integer
+        upvoted:
+          type: boolean
+        downvoted:
+          type: boolean
+  responses:
+    StationInfoGetResponse:
+      description: Successful GET response from API
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status: 
+                type: integer
+              body:
+                $ref: '#/components/schemas/StationInfo'
+          examples:
+            StationInfoResponseExample:
+              $ref: '#/components/examples/StationInfoResponseExample'
+    StationHotelGetResponse:
+      description: Successful GET response from API
+      content:
+        image/png:
+          schema:
+            type: object
+            format: binary
+    StationNotePostResponse:
+      description: Successful POST response from API
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: integer
+              body:
+                type: object
+                properties:
+                  noteId:
+                    type: string
+                  note:
+                    type: string
+                  activeVersion:
+                    type: string
+                  visibility:
+                    type: integer
+                  createdBy: 
+                    type: string
+                  createdAt: 
+                    type: string
+          examples:
+            StationNoteCreationResponseExample:
+              $ref: '#/components/examples/StationNotePostResponseExample'
+    StationNoteGetResponse:
+      description: Successful GET response from API
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              body:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StationNote'
+          examples:
+            StationNoteGetResponseExample:
+              $ref: '#/components/examples/StationNoteGetResponseExample'
+    StationNotePutResponse:
+      description: Successful PUT response from API
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: integer
+              body:
+                type: object
+                properties:
+                  noteId:
+                    type: string
+                  note:
+                    type: string
+                  activeVersion:
+                    type: string
+                  versions:
+                    type: array
+                    items:
+                      properties:
+                        note:
+                          type: string
+                        createdBy:
+                          type: string
+                        createdAt:
+                          type: string
+                        upvotes:
+                          type: integer
+                        downvotes:
+                          type: integer
+                        upvoted:
+                          type: boolean
+                        downvoted:
+                          type: boolean
+          examples:
+            StationNoteUpdateResponseExample:
+              $ref: '#/components/examples/StationNotePutResponseExample'
+    StationNotePatchResponse:
+      description: Successful PATCH response from API
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status: 
+                type: integer
+              body:
+                type: object
+                properties:
+                  noteId:
+                      type: string
+                  note:
+                    type: string
+                  visibility:
+                    type: integer
+                  activeVersion:
+                    type: string
+                  versions:
+                    type: array
+                    items:
+                      properties:
+                        note:
+                          type: string
+                        createdBy:
+                          type: string
+                        createdAt:
+                          type: string
+                        upvotes:
+                          type: integer
+                        downvotes:
+                          type: integer
+                        upvoted:
+                          type: boolean
+                        downvoted:
+                          type: boolean
+          examples:
+            StationNoteUpdateVoteResponseExample:
+              $ref: '#/components/examples/StationNotePatchResponseExample'
+    StationNoteDeleteResponse:
+      description: Successful DELETE response from API
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status: 
+                type: integer
+          examples:
+            StationNoteDeleteResponseExample:
+              $ref: '#/components/examples/StationNoteDeleteResponseExample'
+    InternalServerError:
+      description: |
+        An error occured while processing the request.
+        Please contact airside@sas.se
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    
